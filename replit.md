@@ -38,7 +38,7 @@ An AI beauty concierge for Dhull Cosmetic Shop, with streaming replies in Englis
 
 - Rose-gold beauty brand landing state with floating chat entry
 - Responsive full chat window with quick replies, typing state, retry handling, WhatsApp CTA, and bilingual prompt
-- Streaming AI replies via Groq model `llama-3.3-70b-versatile`
+- Streaming AI replies via Groq model `openai/gpt-oss-120b`, the current replacement for the retired Llama model
 - In-memory per-IP rate limiting for the API route
 
 ## User preferences

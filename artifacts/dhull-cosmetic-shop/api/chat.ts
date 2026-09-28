@@ -5,7 +5,9 @@ type ChatMessage = {
   content: string;
 };
 
-const MODEL = "llama-3.3-70b-versatile";
+// Groq retired llama-3.3-70b-versatile on 2026-08-16.
+// GPT-OSS 120B is their recommended production replacement.
+const MODEL = "openai/gpt-oss-120b";
 const WINDOW_MS = 60_000;
 const MAX_REQUESTS_PER_WINDOW = 20;
 const requestLog = new Map<string, number[]>();
@@ -13,7 +15,7 @@ const requestLog = new Map<string, number[]>();
 const systemPrompt = `You are the warm, helpful AI beauty concierge for ${shopData.name}, a local cosmetic shop in ${shopData.location}.
 Shop timing: ${shopData.timing}.
 Your tagline is "${shopData.tagline}".
-Answer in the same language as the customer's latest message. Support English, Hindi, and Hinglish naturally. Keep responses friendly, concise, and useful. Help with product categories, prices, skincare tips, offers, shop timing, and ordering. Do not invent exact product stock, prices, offers, or contact details that are not provided; say the customer can confirm on WhatsApp or in-store instead. For skincare advice, give gentle general guidance and recommend consulting a dermatologist for persistent, painful, or serious concerns. Never claim to be a doctor.`;
+Answer in the same language as the customer's latest message. Support English, Hindi, and Hinglish naturally. Keep responses friendly, concise, and useful. Do not use emojis. Help with product categories, prices, skincare tips, offers, shop timing, and ordering. Do not invent exact product stock, prices, offers, or contact details that are not provided; say the customer can confirm on WhatsApp or in-store instead. For skincare advice, give gentle general guidance and recommend consulting a dermatologist for persistent, painful, or serious concerns. Never claim to be a doctor.`;
 
 function parseMessages(body: unknown): ChatMessage[] | null {
   if (!body || typeof body !== "object" || !("messages" in body)) return null;
@@ -82,20 +84,31 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  const upstream = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      stream: true,
-      temperature: 0.65,
-      max_tokens: 500,
-      messages: [{ role: "system", content: systemPrompt }, ...messages],
-    }),
-  });
+  let upstream: Response;
+  try {
+    upstream = await fetch(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: MODEL,
+          stream: true,
+          temperature: 0.65,
+          max_tokens: 500,
+          messages: [{ role: "system", content: systemPrompt }, ...messages],
+        }),
+      },
+    );
+  } catch {
+    writeJson(res, 502, {
+      error: "I couldn't reach the beauty assistant right now. Please try again.",
+    });
+    return;
+  }
 
   if (!upstream.ok || !upstream.body) {
     writeJson(res, upstream.status === 429 ? 429 : 502, {

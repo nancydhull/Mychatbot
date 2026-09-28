@@ -205,7 +205,16 @@ function ChatWindow({ onClose }: { onClose: () => void }) {
       body: JSON.stringify({ messages: apiMessages }),
       signal: controller.signal,
     });
-    if (!response.ok) throw new Error(`Chat request failed with ${response.status}`);
+    if (!response.ok) {
+      let message = `Chat request failed with ${response.status}`;
+      try {
+        const payload = (await response.json()) as { error?: string };
+        if (payload.error) message = payload.error;
+      } catch {
+        // Keep the status-based message when the server does not return JSON.
+      }
+      throw new Error(message);
+    }
     if (!response.body) throw new Error('No response stream received');
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
@@ -254,10 +263,14 @@ function ChatWindow({ onClose }: { onClose: () => void }) {
         .slice(-10)
         .map(({ role, content }) => ({ role, content }));
       await appendStream(apiMessages, assistantMessage.id);
-    } catch {
+    } catch (caughtError) {
       setMessages((current) => current.filter((message) => message.id !== assistantMessage.id));
       setLastFailedText(cleanText);
-      setError('I could not reach the beauty desk right now. Please try once more.');
+      setError(
+        caughtError instanceof Error && caughtError.message
+          ? caughtError.message
+          : 'I could not reach the beauty desk right now. Please try once more.',
+      );
     } finally {
       setIsSending(false);
       abortRef.current = null;
