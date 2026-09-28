@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Dhull Cosmetic Shop"
+description = "A polished AI beauty concierge for Dhull Cosmetic Shop, helping customers in English, Hindi, and Hinglish with products, prices, tips, offers, timing, and WhatsApp orders."
+version = "1.0.0"
+id = "artifacts/dhull-cosmetic-shop"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23318
+
+[services.development]
+run = "pnpm --filter @workspace/dhull-cosmetic-shop run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/dhull-cosmetic-shop", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/dhull-cosmetic-shop/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23318"
+BASE_PATH = "/"

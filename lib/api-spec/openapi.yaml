@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: chat
+    description: Dhull Cosmetic Shop AI concierge
 paths:
   /healthz:
     get:
@@ -24,6 +26,42 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /chat:
+    post:
+      operationId: sendChatMessage
+      tags: [chat]
+      summary: Stream an AI response from the shop concierge
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatInput"
+      responses:
+        "200":
+          description: A streamed text response
+          content:
+            text/event-stream:
+              schema:
+                type: string
+        "400":
+          description: Invalid chat payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: AI provider error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +71,30 @@ components:
           type: string
       required:
         - status
+    ChatMessage:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+          minLength: 1
+      required: [role, content]
+    ChatInput:
+      type: object
+      properties:
+        messages:
+          type: array
+          minItems: 1
+          maxItems: 10
+          items:
+            $ref: "#/components/schemas/ChatMessage"
+      required: [messages]
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
 

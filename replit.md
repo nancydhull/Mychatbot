@@ -1,15 +1,16 @@
-# [Project name]
+# Dhull Cosmetic Shop
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+An AI beauty concierge for Dhull Cosmetic Shop, with streaming replies in English, Hindi, and Hinglish.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `pnpm --filter @workspace/api-server run dev` — run the shared API server
+- `pnpm --filter @workspace/dhull-cosmetic-shop run dev` — run the Dhull Cosmetic Shop web app
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- Required env: `GROQ_API_KEY` — server-side Groq credential for `/api/chat`
 
 ## Stack
 
@@ -22,23 +23,32 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/dhull-cosmetic-shop/src/App.tsx` — chat UI, streaming client, session memory
+- `artifacts/dhull-cosmetic-shop/src/config/shop-data.js` — editable shop identity and WhatsApp settings
+- `artifacts/dhull-cosmetic-shop/api/chat.ts` — Vercel-compatible serverless chat function
+- `artifacts/api-server/src/lib/chat.ts` — Replit preview API implementation
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Groq is called only from server-side handlers; the browser receives streamed text over `/api/chat`.
+- The client sends the latest 10 non-empty messages for each request and keeps the visible conversation in `sessionStorage`.
+- `shop-data.js` is the easy-to-edit source for user-facing shop details; the local preview API mirrors the same values for its system prompt.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- Rose-gold beauty brand landing state with floating chat entry
+- Responsive full chat window with quick replies, typing state, retry handling, WhatsApp CTA, and bilingual prompt
+- Streaming AI replies via Groq model `llama-3.3-70b-versatile`
+- In-memory per-IP rate limiting for the API route
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- Shop details are placeholders and should be edited in `shop-data.js`.
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- The Vercel deployment root should be `artifacts/dhull-cosmetic-shop` so Vercel sees both `api/chat.ts` and the Vite package.
+- The WhatsApp number is a placeholder in `shop-data.js` and should be replaced before publishing.
 
 ## Pointers
 
