@@ -1,0 +1,1 @@
+- [Vercel TypeScript emission](vercel-typescript-emission.md) — Vercel's temporary compiler config needs explicit paths to the app's type packages.
