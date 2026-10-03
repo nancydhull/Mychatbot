@@ -1,1 +1,1 @@
-- [Vercel TypeScript emission](vercel-typescript-emission.md) — Vercel's temporary compiler config needs explicit paths to the app's type packages.
+- [Vercel TypeScript emission](vercel-typescript-emission.md) — Vercel forces emit; `allowImportingTsExtensions` can block TypeScript functions with `TS5096`.
