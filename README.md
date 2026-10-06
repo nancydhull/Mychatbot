@@ -3,8 +3,7 @@
 > An AI-powered customer-support chatbot for **Dhull Cosmetic Shop**, Kaithal, Haryana, that answers customers' questions instantly, politely, and professionally.
 
 🔗 **Replit Project:** [Dhull-Cosmetic-Shop-Chatbot](https://replit.com/@nancydhull72/Dhull-Cosmetic-Shop-Chatbot)
-
----
+<img width="1017" height="741" alt="Screenshot 2026-10-06 103200" src="https://github.com/user-attachments/assets/d3473341-7a38-42a9-8674-c4280f294fce" />
 
 ## 📌 Table of Contents
 
